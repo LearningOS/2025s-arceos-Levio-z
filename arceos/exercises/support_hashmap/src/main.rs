@@ -4,8 +4,8 @@
 #[macro_use]
 #[cfg(feature = "axstd")]
 extern crate axstd as std;
-
-use std::collections::HashMap;
+#[cfg(feature = "axstd")]
+use std::HashMap;
 
 #[cfg_attr(feature = "axstd", no_mangle)]
 fn main() {

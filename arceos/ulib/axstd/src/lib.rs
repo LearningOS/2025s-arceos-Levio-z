@@ -62,6 +62,9 @@ pub use core::{arch, cell, cmp, hint, marker, mem, ops, ptr, slice, str};
 
 #[macro_use]
 mod macros;
+#[cfg(feature = "alloc")]
+mod hash;
+
 
 pub mod env;
 pub mod io;
@@ -70,6 +73,8 @@ pub mod process;
 pub mod sync;
 pub mod thread;
 pub mod time;
+#[cfg(feature = "alloc")]
+pub use self::hash::map::HashMap as HashMap;
 
 #[cfg(feature = "fs")]
 pub mod fs;

@@ -74,6 +74,12 @@ pub mod mem {
         /// the buffer life cycle.
         pub unsafe fn ax_dealloc(ptr: NonNull<u8>, layout: Layout);
     }
+    
+    define_api! {
+        @cfg "alloc";
+        /// ax_random
+        pub fn ax_random() -> u128;
+    }
 
     define_api_type! {
         @cfg "dma";

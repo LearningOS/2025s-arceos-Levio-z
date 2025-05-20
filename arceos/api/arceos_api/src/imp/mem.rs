@@ -10,6 +10,10 @@ cfg_alloc! {
     pub fn ax_dealloc(ptr: NonNull<u8>, layout: Layout) {
         axalloc::global_allocator().dealloc(ptr, layout)
     }
+
+    pub fn ax_random() -> u128 {
+        axhal::misc::random()
+    }
 }
 
 cfg_dma! {
