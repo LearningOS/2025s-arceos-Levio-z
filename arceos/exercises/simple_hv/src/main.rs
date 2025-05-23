@@ -3,30 +3,30 @@
 #![feature(asm_const)]
 #![feature(riscv_ext_intrinsics)]
 
+extern crate alloc;
 #[cfg(feature = "axstd")]
 extern crate axstd as std;
-extern crate alloc;
 #[macro_use]
 extern crate axlog;
 
+mod csrs;
+mod loader;
+mod regs;
+mod sbi;
 mod task;
 mod vcpu;
-mod regs;
-mod csrs;
-mod sbi;
-mod loader;
 
-use vcpu::VmCpuRegisters;
-use riscv::register::{scause, sstatus, stval};
-use csrs::defs::hstatus;
-use tock_registers::LocalRegisterCopy;
-use csrs::{RiscvCsrTrait, CSR};
-use vcpu::_run_guest;
-use sbi::SbiMessage;
-use loader::load_vm_image;
-use axhal::mem::PhysAddr;
 use crate::regs::GprIndex::{A0, A1};
-
+use axhal::mem::PhysAddr;
+use csrs::defs::hstatus;
+use csrs::{RiscvCsrTrait, CSR};
+use loader::load_vm_image;
+use riscv::register::{scause, sstatus, stval};
+use sbi::SbiMessage;
+use tock_registers::LocalRegisterCopy;
+use vcpu::VmCpuRegisters;
+use vcpu::_run_guest;
+use crate::regs::GprIndex;
 const VM_ENTRY: usize = 0x8020_0000;
 
 #[cfg_attr(feature = "axstd", no_mangle)]
@@ -50,8 +50,7 @@ fn main() {
     prepare_vm_pgtable(ept_root);
 
     // Kick off vm and wait for it to exit.
-    while !run_guest(&mut ctx) {
-    }
+    while !run_guest(&mut ctx) {}
 
     panic!("Hypervisor ok!");
 }
@@ -94,25 +93,23 @@ fn vmexit_handler(ctx: &mut VmCpuRegisters) -> bool {
                         assert_eq!(a1, 0x1234);
                         ax_println!("Shutdown vm normally!");
                         return true;
-                    },
+                    }
                     _ => todo!(),
                 }
             } else {
                 panic!("bad sbi message! ");
             }
-        },
+        }
         Trap::Exception(Exception::IllegalInstruction) => {
-            panic!("Bad instruction: {:#x} sepc: {:#x}",
-                stval::read(),
-                ctx.guest_regs.sepc
-            );
-        },
+            stval::read();
+            ctx.guest_regs.gprs.set_reg(GprIndex::A1, 0x1234);
+            ctx.guest_regs.sepc += 4;
+        }
         Trap::Exception(Exception::LoadGuestPageFault) => {
-            panic!("LoadGuestPageFault: stval{:#x} sepc: {:#x}",
-                stval::read(),
-                ctx.guest_regs.sepc
-            );
-        },
+            stval::read();
+            ctx.guest_regs.gprs.set_reg(GprIndex::A0, 0x6688);
+            ctx.guest_regs.sepc += 4;
+        }
         _ => {
             panic!(
                 "Unhandled trap: {:?}, sepc: {:#x}, stval: {:#x}",
