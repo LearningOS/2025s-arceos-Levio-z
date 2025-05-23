@@ -1,7 +1,7 @@
 use std::io::{self, Read};
 use std::fs::File;
 use axhal::paging::MappingFlags;
-use axhal::mem::{PAGE_SIZE_4K, phys_to_virt};
+use axhal::mem::PAGE_SIZE_4K;
 use axmm::AddrSpace;
 use crate::APP_ENTRY;
 

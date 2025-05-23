@@ -165,15 +165,14 @@ impl VfsNodeOps for DirNode {
         }
     }
 
-     /// Renames or moves existing file or directory.
-     fn rename (&self, src_path: &str, dst_path: &str) -> VfsResult {
+    /// Renames or moves existing file or directory.
+    fn rename(&self, src_path: &str, dst_path: &str) -> VfsResult {
+        log::debug!("rename at src_path：{}，dst_path: {}", src_path,dst_path);
         let node = self.this.upgrade().unwrap().clone();
         let src = node.lookup(src_path)?;
-        self.remove(src_path);
-        let (name, rest) = split_path(dst_path);
-        self.children
-        .write()
-        .insert(rest.unwrap().into(), src);
+        let _= self.remove(src_path);
+        let (_, rest) = split_path(dst_path);
+        self.children.write().insert(rest.unwrap().into(), src);
         Ok(())
     }
 
