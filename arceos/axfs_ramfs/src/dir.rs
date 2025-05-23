@@ -165,6 +165,18 @@ impl VfsNodeOps for DirNode {
         }
     }
 
+     /// Renames or moves existing file or directory.
+     fn rename (&self, src_path: &str, dst_path: &str) -> VfsResult {
+        let node = self.this.upgrade().unwrap().clone();
+        let src = node.lookup(src_path)?;
+        self.remove(src_path);
+        let (name, rest) = split_path(dst_path);
+        self.children
+        .write()
+        .insert(rest.unwrap().into(), src);
+        Ok(())
+    }
+
     axfs_vfs::impl_vfs_dir_default! {}
 }
 
